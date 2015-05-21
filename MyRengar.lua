@@ -1,26 +1,32 @@
-local version = "1.2"
+local version = "1.1"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/Fret13103/Scripts/blob/master/MyRengar.lua".."?rand="..math.random(1,10000)
 local UPDATE_FILE_PATH = SCRIPT_PATH..GetCurrentEnv().FILE_NAME
 local UPDATE_URL = "https://"..UPDATE_HOST..UPDATE_PATH
 
-function _AutoupdaterMsg(msg) print("<font color=\"#6699ff\"><b>My Rengar:</b></font> <font color=\"#FFFFFF\">"..msg..".</font>") end
+function AutoupdaterMsg(msg) print("<font color=\"#6699ff\"><b>My Rengar:</b></font> <font color=\"#FFFFFF\">"..msg..".</font>") end
 if AUTOUPDATE then
-	local ServerData = GetWebResult(UPDATE_HOST, "/Fret13103/Scripts/blob/master/MyRengar.version")
+	print("LOOKING FOR UPDATE")
+	local ServerData = GetWebResult(UPDATE_HOST,"/Fret13103/Scripts/master/MyRengar.version")
+	print(ServerData)
 	if ServerData then
+		print("Has server Data")
 		ServerVersion = type(tonumber(ServerData)) == "number" and tonumber(ServerData) or nil
+		print(ServerVersion)
 		if ServerVersion then
 			if tonumber(version) < ServerVersion then
-				_AutoupdaterMsg("New version available "..ServerVersion)
-				_AutoupdaterMsg("Updating, please don't press F9")
-				DelayAction(function() DownloadFile(UPDATE_URL, UPDATE_FILE_PATH, function () _AutoupdaterMsg("Successfully updated. ("..version.." => "..ServerVersion.."), press F9 twice to load the updated version.") end) end, 3)
+				AutoupdaterMsg("New version available "..ServerVersion)
+				AutoupdaterMsg("Updating, please don't press F9")
+				print("Updating")
+				DelayAction(function() DownloadFile(UPDATE_URL, UPDATE_FILE_PATH, function () _AutoupdaterMsg("Successfully updated. ("..version.." => "..ServerVersion.."), press F9 twice to load the updated version.") end) print("Updated")end, 3)
+				--print("Updated")
 			else
-				_AutoupdaterMsg("You have got the latest version ("..ServerVersion..")")
+				AutoupdaterMsg("You have got the latest version ("..ServerVersion..")")
 			end
 		end
 	else
-		_AutoupdaterMsg("Error downloading version info")
+		AutoupdaterMsg("Error downloading version info")
 	end
 end
 
@@ -83,7 +89,7 @@ else ign = nil end
 
 LoadOrbwalker()
 
-print("My Rengar(v:"..version.." is:<font> <font color = \"#FF0000\">Loaded! </font>")
+print("My Rengar(v:"..version..") is:<font> <font color = \"#FF0000\">Loaded! </font>")
 end
 
 function OnDraw()
@@ -132,9 +138,9 @@ function OnTick()
   target = ts.target
 	fury = myHero.mana
 	range = myHero.range + GetDistance(myHero.maxBBox)
-	AutoHeal() -- More heals!
+	AutoHeal() -- More heals! 
 	HighFuryCombo()
-	LowFuryCombo()
+	LowFuryCombo() 
 	Ignite()
 	GetItemSlot()
 	UseItems()
@@ -413,7 +419,7 @@ function UseItems()
 				CastSpell(Hydra)
 			end
 		elseif isSac then
-			if not _G.AutoCarry.Orbwalker:IsShooting() then
+			if not _G.AutoCarry.Orbwalker:IsShooting() then 
 				CastSpell(Hydra)
 			end
 		end
@@ -475,14 +481,14 @@ for i, v in ipairs(minionManager(MINION_ENEMY,range,player, MINION_SORT_HEALTH_A
                 lowestMinion = v
         elseif v.health < lowestMinion.health then
                 lowestMinion = v
-        end
+        end    
 end
 for i, v in ipairs(minionManager(MINION_JUNGLE,1000,player,MINION_SORT_HEALTH_ASC).objects) do
         if lowestMinion == nil then
                 lowestMinion = v
         elseif v.health < lowestMinion.health then
                 lowestMinion = v
-        end
+        end    
 end
 
 if ValidTarget(lowestMinion) and Farming.LaneClear and fury < 5 then
@@ -534,14 +540,14 @@ for i, v in ipairs(minionManager(MINION_ENEMY,range,player, MINION_SORT_HEALTH_A
                 lowestMinion = v
         elseif v.health < lowestMinion.health then
                 lowestMinion = v
-        end
+        end    
 end
 for i, v in ipairs(minionManager(MINION_JUNGLE,1000,player,MINION_SORT_HEALTH_ASC).objects) do
         if lowestMinion == nil then
                 lowestMinion = v
         elseif v.health < lowestMinion.health then
                 lowestMinion = v
-        end
+        end    
 end
 
 if ValidTarget(lowestMinion) and Farming.LaneHit and fury < 5 then
