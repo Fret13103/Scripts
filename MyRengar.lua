@@ -1,4 +1,4 @@
-local version = "1"
+local version = "1.2"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/Fret13103/Scripts/blob/master/MyRengar.lua".."?rand="..math.random(1,10000)
@@ -132,9 +132,9 @@ function OnTick()
   target = ts.target
 	fury = myHero.mana
 	range = myHero.range + GetDistance(myHero.maxBBox)
-	AutoHeal() -- More heals! 
+	AutoHeal() -- More heals!
 	HighFuryCombo()
-	LowFuryCombo() 
+	LowFuryCombo()
 	Ignite()
 	GetItemSlot()
 	UseItems()
@@ -413,7 +413,7 @@ function UseItems()
 				CastSpell(Hydra)
 			end
 		elseif isSac then
-			if not _G.AutoCarry.Orbwalker:IsShooting() then 
+			if not _G.AutoCarry.Orbwalker:IsShooting() then
 				CastSpell(Hydra)
 			end
 		end
@@ -475,14 +475,14 @@ for i, v in ipairs(minionManager(MINION_ENEMY,range,player, MINION_SORT_HEALTH_A
                 lowestMinion = v
         elseif v.health < lowestMinion.health then
                 lowestMinion = v
-        end    
+        end
 end
 for i, v in ipairs(minionManager(MINION_JUNGLE,1000,player,MINION_SORT_HEALTH_ASC).objects) do
         if lowestMinion == nil then
                 lowestMinion = v
         elseif v.health < lowestMinion.health then
                 lowestMinion = v
-        end    
+        end
 end
 
 if ValidTarget(lowestMinion) and Farming.LaneClear and fury < 5 then
@@ -534,14 +534,14 @@ for i, v in ipairs(minionManager(MINION_ENEMY,range,player, MINION_SORT_HEALTH_A
                 lowestMinion = v
         elseif v.health < lowestMinion.health then
                 lowestMinion = v
-        end    
+        end
 end
 for i, v in ipairs(minionManager(MINION_JUNGLE,1000,player,MINION_SORT_HEALTH_ASC).objects) do
         if lowestMinion == nil then
                 lowestMinion = v
         elseif v.health < lowestMinion.health then
                 lowestMinion = v
-        end    
+        end
 end
 
 if ValidTarget(lowestMinion) and Farming.LaneHit and fury < 5 then
