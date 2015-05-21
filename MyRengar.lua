@@ -1,4 +1,4 @@
-local version = "1"
+local version = "1.1"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/Fret13103/Scripts/master/MyRengar.lua".."?rand="..math.random(1,10000)
@@ -42,7 +42,7 @@ HP_Q = HPSkillshot({type = "DelayLine", delay = 0, range = 1100, speed = 1100, r
 --promptline = math.huge speed, delayline is normal lineskillshot.
 
 function OnLoad()
-ts = TargetSelector(TARGET_LOW_HP_PRIORITY, eRange, true)
+ts = TargetSelector(TARGET_LESS_CAST_PRIORITY, eRange, true)
 
 VP = VPrediction()
 HP = HPrediction()
@@ -97,6 +97,9 @@ ComboType = combotype
 PredictionType = config.Pred
 	if config.Drawing.draw then
 		DrawCircle(myHero.x, myHero.y, myHero.z, range, 0xffffff)
+		if ValidTarget(target) then
+		DrawCircle(target.x, target.y, target.z, 200, 0xff0000)
+		end
 		if config.Drawing.drawType then
 			if ComboType == 1 then
 				local startLeft = WorldToScreen(D3DXVECTOR3(myHero.x, myHero.y, myHero.z))
@@ -137,9 +140,9 @@ function OnTick()
   target = ts.target
 	fury = myHero.mana
 	range = myHero.range + GetDistance(myHero.maxBBox)
-	AutoHeal() -- More heals! 
+	AutoHeal() -- More heals!
 	HighFuryCombo()
-	LowFuryCombo() 
+	LowFuryCombo()
 	Ignite()
 	GetItemSlot()
 	UseItems()
@@ -418,7 +421,7 @@ function UseItems()
 				CastSpell(Hydra)
 			end
 		elseif isSac then
-			if not _G.AutoCarry.Orbwalker:IsShooting() then 
+			if not _G.AutoCarry.Orbwalker:IsShooting() then
 				CastSpell(Hydra)
 			end
 		end
@@ -431,7 +434,7 @@ function UseItems()
 			CastSpell(BORK, target)
 		end
 	end
-	if fight and ValidTarget(target) and Ghostblade and CanCast(Ghostblade) then
+	if fight and ValidTarget(target) and Ghostblade and CanCast(Ghostblade) and GetDistance(target) < range then
 		CastSpell(Ghostblade)
 	end
 end
@@ -443,7 +446,7 @@ function Harass()
 			CastSpell(_W)
 		end
 		if fury < 5 then
-			if config.harass.EmpE and CanCast(_E) and GetDistance(target) < 1100 then
+			if CanCast(_E) and GetDistance(target) < 1100 and config.harass.UseE then
 				if PredictionType == 1 then
 							local CastPosition,  HitChance,  Position = VP:GetLineCastPosition(target, 0, 80, eRange, 1100, myHero, true)
 							if HitChance >= 2 and GetDistance(target) <= 1100 then
@@ -456,7 +459,7 @@ function Harass()
 							end
 						end
 			end
-		else if config.harass.UseE and CanCast(_E) and GetDistancee(target) < 1100 then
+		else if config.harass.UseE and CanCast(_E) and GetDistance(target) < 1100 and config.harass.EmpE then
 			if PredictionType == 1 then
 							local CastPosition,  HitChance,  Position = VP:GetLineCastPosition(target, 0, 80, eRange, 1100, myHero, true)
 							if HitChance >= 2 and GetDistance(target) <= 1100 then
@@ -480,14 +483,14 @@ for i, v in ipairs(minionManager(MINION_ENEMY,range,player, MINION_SORT_HEALTH_A
                 lowestMinion = v
         elseif v.health < lowestMinion.health then
                 lowestMinion = v
-        end    
+        end
 end
 for i, v in ipairs(minionManager(MINION_JUNGLE,1000,player,MINION_SORT_HEALTH_ASC).objects) do
         if lowestMinion == nil then
                 lowestMinion = v
         elseif v.health < lowestMinion.health then
                 lowestMinion = v
-        end    
+        end
 end
 
 if ValidTarget(lowestMinion) and Farming.LaneClear and fury < 5 then
@@ -539,19 +542,19 @@ for i, v in ipairs(minionManager(MINION_ENEMY,range,player, MINION_SORT_HEALTH_A
                 lowestMinion = v
         elseif v.health < lowestMinion.health then
                 lowestMinion = v
-        end    
+        end
 end
 for i, v in ipairs(minionManager(MINION_JUNGLE,1000,player,MINION_SORT_HEALTH_ASC).objects) do
         if lowestMinion == nil then
                 lowestMinion = v
         elseif v.health < lowestMinion.health then
                 lowestMinion = v
-        end    
+        end
 end
 
-if ValidTarget(lowestMinion) and Farming.LaneHit and fury < 5 then
+if ValidTarget(lowestMinion) and Farming.LastHit then
 if fury < 5 then
-	qDmg = myHero:GetSpellData(_Q).level * 30 + (myHero.totalDamage / 100 * (myHero:	GetSpellData(_Q).level * 5))
+	qDmg = myHero.totalDamage + myHero:GetSpellData(_Q).level * 30 + (myHero.totalDamage / 100 * (myHero:	GetSpellData(_Q).level * 5))
 	wDmg = myHero:GetSpellData(_W).level * 24  + 50 + myHero.ap / 100 * 80
 	eDmg = myHero:GetSpellData(_E).level * 50 + myHero.totalDamage / 100 * 70
 else
