@@ -1,4 +1,4 @@
-local version = "1.2"
+local version = "1.3"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/Fret13103/Scripts/master/MyRengar.lua".."?rand="..math.random(1,10000)
@@ -39,8 +39,9 @@ local eRange = 1100
 require "VPrediction"
 require "HPrediction"
 
-HP_Q = HPSkillshot({type = "DelayLine", delay = 0, range = 1100, speed = 1100, radius = 80})
+HP_Q = HPSkillshot({type = "DelayLine", delay = 0, range = 1100, speed = 1500, radius = 80})
 --promptline = math.huge speed, delayline is normal lineskillshot.
+--took me a day but I finally got close enough to the right speed of E for HPRED.
 
 function OnLoad()
 ts = TargetSelector(TARGET_LESS_CAST_PRIORITY, eRange, true)
@@ -78,6 +79,8 @@ config.ComboSettings.empCont:addParam("AutoHeal", "Auto Heal at health %", SCRIP
 
 config.Keys:addParam("ComboKey", "Combo Key:", SCRIPT_PARAM_ONKEYDOWN, false, string.byte(" "))
 config.Keys:addParam("Harass", "Harass Key:", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("C"))
+config.Keys:addParam("infoo", "Z toggle emp farm", SCRIPT_PARAM_INFO, "")
+config.Keys:addParam("infooo", "Arrow keys(left right) set combo type", SCRIPT_PARAM_INFO, "")
 
 config.Drawing:addParam("draw", "Do drawing", SCRIPT_PARAM_ONOFF, true)
 config.Drawing:addParam("drawType", "Draw combo type", SCRIPT_PARAM_ONOFF, true)
@@ -506,7 +509,7 @@ for i, v in ipairs(minionManager(MINION_JUNGLE,1000,player,MINION_SORT_HEALTH_AS
         end
 end
 
-if ValidTarget(lowestMinion) and Farming.LaneClear and fury < 5 then
+if ValidTarget(lowestMinion) and Farming.LaneClear then
 if fury < 5 then
 	qDmg = myHero:GetSpellData(_Q).level * 30 + (myHero.totalDamage / 100 * (myHero:	GetSpellData(_Q).level * 5))
 	wDmg = myHero:GetSpellData(_W).level * 24  + 50 + myHero.ap / 100 * 80
