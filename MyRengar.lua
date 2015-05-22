@@ -1,4 +1,4 @@
-local version = "1.1"
+local version = "1.2"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/Fret13103/Scripts/master/MyRengar.lua".."?rand="..math.random(1,10000)
@@ -22,6 +22,7 @@ if AUTOUPDATE then
 				--print("Updated")
 			else
 				AutoupdaterMsg("You have got the latest version ("..ServerVersion..")")
+				AutoupdaterMsg("If your local version > server version then please report this")
 			end
 		end
 	else
@@ -115,6 +116,10 @@ PredictionType = config.Pred
 				local startLeft = WorldToScreen(D3DXVECTOR3(myHero.x, myHero.y, myHero.z))
         DrawText("HPrediction", 18, startLeft.x, (startLeft.y - 20), 0xFFFFFFFF)
 			end
+			if empFarming then
+				local startLeft = WorldToScreen(D3DXVECTOR3(myHero.x, myHero.y, myHero.z))
+        DrawText("EMPOWERED FARMING ENABLED", 18, startLeft.x, (startLeft.y - 40), 0xFACC2E0F)
+			end
 		end
 		if config.Drawing.drawSpells then
 			if CanCast(_W) then
@@ -137,7 +142,7 @@ function OnTick()
 	Harass()
 	AutoHeal()
   ts:update()
-  target = ts.target
+  target = ReturnTarget()
 	fury = myHero.mana
 	range = myHero.range + GetDistance(myHero.maxBBox)
 	AutoHeal() -- More heals!
@@ -366,12 +371,20 @@ if config.Keys.ComboKey then
 	end
 end
 end
-
+empFarming = false
 function OnWndMsg(Msg, Key)
 	if Msg == KEY_DOWN and Key == GetKey("%") then
 		if combotype == 2 then combotype = 1 end
 	elseif Msg == KEY_DOWN and Key == GetKey("'") then
 		if combotype == 1 then combotype = 2 end
+	elseif Msg == KEY_DOWN and Key == GetKey("Z") then
+		if empFarming == false then empFarming = true else empFarming = false end
+	end
+	if Msg == WM_LBUTTONDOWN then
+		closest = ReturnClosestTo(mousePos)
+		if GetDistance(mousePos, closest) < 125 and ValidTarget(closest) then
+			clickTarget = ReturnClosestTo(mousePos)
+		end
 	end
 end
 
@@ -434,7 +447,7 @@ function UseItems()
 			CastSpell(BORK, target)
 		end
 	end
-	if fight and ValidTarget(target) and Ghostblade and CanCast(Ghostblade) and GetDistance(target) < range then
+	if fight and ValidTarget(target) and Ghostblade and CanCast(Ghostblade) and GetDistance(target) < (range*range) then
 		CastSpell(Ghostblade)
 	end
 end
@@ -503,21 +516,41 @@ else
 	wDmg = myHero:GetSpellData(_W).level * 50 + myHero.ap / 100 * 80 --about right
 	eDmg = myHero:GetSpellData(_E).level * 58 + 50 + myHero.totalDamage / 100 * 70
 end
-if CanCast(_Q) and Farming.UseQ and GetDistance(lowestMinion) < range and lowestMinion.health < qDmg or lowestMinion.health > qDmg + 25 and Farming.LaneClear and fury < 5 then
+if CanCast(_Q) and Farming.UseQ and GetDistance(lowestMinion) < range and lowestMinion.health < qDmg or lowestMinion.health > qDmg + 25 and Farming.LaneClear then
 if isSac then
 	if not _G.AutoCarry.Orbwalker:IsShooting() and _G.AutoCarry.Orbwalker:CanMove() then
-		CastSpell(_Q)
-		myHero:Attack(lowestMinion)
+		if fury == 5 then
+			if empFarming then
+				CastSpell(_Q)
+				myHero:Attack(lowestMinion)
+			end
+		else
+			CastSpell(_Q)
+			myHero:Attack(lowestMinion)
+		end
 	end
 elseif isSx then
 	if SxOrb:CanMove() then
-		CastSpell(_Q)
-		myHero:Attack(lowestMinion)
+		if fury == 5 then
+			if empFarming then
+				CastSpell(_Q)
+				myHero:Attack(lowestMinion)
+			end
+		else
+			CastSpell(_Q)
+			myHero:Attack(lowestMinion)
+		end
 	end
 end
 end
-if CanCast(_W) and Farming.UseW and GetDistance(lowestMinion) < 500 and lowestMinion.health < wDmg or lowestMinion.health > wDmg + 25 and fury < 5 then
-CastSpell(_W)
+if CanCast(_W) and Farming.UseW and GetDistance(lowestMinion) < 500 and lowestMinion.health < wDmg or lowestMinion.health > wDmg + 25 then
+if fury < 5 then
+	if empFarming then
+		CastSpell(_W)
+	end
+else
+	CastSpell(_W)
+end
 end
 if CanCast(_E) and Farming.UseE and GetDistance(lowestMinion) < 1100 and lowestMinion.health < eDmg or lowestMinion.health > eDmg + 25 and fury < 5 then
 if PredictionType == 1 then
@@ -562,21 +595,41 @@ else
 	wDmg = myHero:GetSpellData(_W).level * 50 + myHero.ap / 100 * 80 --about right
 	eDmg = myHero:GetSpellData(_E).level * 58 + 50 + myHero.totalDamage / 100 * 70
 end
-if CanCast(_Q) and Farming.UseQ and GetDistance(lowestMinion) < range and lowestMinion.health < qDmg and Farming.LastHit and fury < 5 then
+if CanCast(_Q) and Farming.UseQ and GetDistance(lowestMinion) < range and lowestMinion.health < qDmg and Farming.LastHit then
 if isSac then
 	if not _G.AutoCarry.Orbwalker:IsShooting() and _G.AutoCarry.Orbwalker:CanMove() then
+		if fury == 5 then
+		if empFarming then
 		CastSpell(_Q)
 		myHero:Attack(lowestMinion)
+		end
+		else
+		CastSpell(_Q)
+		myHero:Attack(lowestMinion)
+		end
 	end
 elseif isSx then
 	if SxOrb:CanMove() then
+		if fury == 5 then
+		if empFarming then
 		CastSpell(_Q)
 		myHero:Attack(lowestMinion)
+		end
+		else
+		CastSpell(_Q)
+		myHero:Attack(lowestMinion)
+		end
 	end
 end
 end
-if CanCast(_W) and Farming.UseW and GetDistance(lowestMinion) < 500 and lowestMinion.health < wDmg and fury < 5 then
+if CanCast(_W) and Farming.UseW and GetDistance(lowestMinion) < 500 and lowestMinion.health < wDmg then
+if fury == 5 then
+if empFarming then
 CastSpell(_W)
+end
+else
+CastSpell(_W)
+end
 end
 if CanCast(_E) and Farming.UseE and GetDistance(lowestMinion) < 1100 and lowestMinion.health < eDmg and fury < 5 then
 if PredictionType == 1 then
@@ -594,10 +647,27 @@ end
 end
 end
 
+function ReturnTarget()
+	if ValidTarget(closest) and GetDistance(closest) < 2000 then
+		idealTarget = closest
+	elseif ValidTarget(ts.target) then
+		idealTarget = ts.target
+	end
+	return idealTarget
+end
 
-
-
-
+function ReturnClosestTo(Position)
+	ClosestTarget = nil
+	for i = 1, heroManager.iCount, 1 do
+		local targeta = heroManager:getHero(i)
+		if targeta.team ~= myHero.team and ValidTarget(targeta) then
+			if ClosestTarget == nil then ClosestTarget = targeta
+			elseif GetDistance(targeta, mousePos) < GetDistance(ClosestTarget, mousePos) then ClosestTarget = targeta
+			end
+		end
+	end
+	return ClosestTarget
+end
 
 
 
