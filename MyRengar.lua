@@ -1,4 +1,4 @@
-local version = "1.3"
+local version = "1.4"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/Fret13103/Scripts/master/MyRengar.lua".."?rand="..math.random(1,10000)
@@ -48,7 +48,7 @@ ts = TargetSelector(TARGET_LESS_CAST_PRIORITY, eRange, true)
 
 VP = VPrediction()
 HP = HPrediction()
-HP:AddSpell("E", "Rengar", {collisionM = true, collisionH = true, delay = 0, range = 1100, speed = 1100, type = "DelayLine", width = 90})
+HP:AddSpell("E", "Rengar", {collisionM = true, collisionH = true, delay = 0, range = 1100, speed = 1800, type = "DelayLine", width = 90})
 
 config = scriptConfig("My Rengar", "Rengar")
 config:addParam("Pred", "Prediction Type", SCRIPT_PARAM_LIST, 2, {"VPrediction", "HPrediction"})
@@ -148,9 +148,9 @@ function OnTick()
   target = ReturnTarget()
 	fury = myHero.mana
 	range = myHero.range + GetDistance(myHero.maxBBox)
-	AutoHeal() -- More heals!
+	AutoHeal() -- More heals! 
 	HighFuryCombo()
-	LowFuryCombo()
+	LowFuryCombo() 
 	Ignite()
 	GetItemSlot()
 	UseItems()
@@ -238,11 +238,13 @@ if fight then
 							local CastPosition,  HitChance,  Position = VP:GetLineCastPosition(target, 0, 80, eRange, 1100, myHero, true)
 							if HitChance >= 2 and GetDistance(target) <= eRange then
 								CastSpell(_E, CastPosition.x,CastPosition.z)
+								combotype = 1
 							end
 						elseif PredictionType == 2 then
 							local QCastPos, QHitChance = HP:GetPredict("E", target, myHero) -- is actually E
 							if QHitChance >= 2 then
 								CastSpell(_E, QCastPos.x, QCastPos.z)
+								combotype = 1
 							end
 						end
 					end
@@ -374,11 +376,13 @@ if config.Keys.ComboKey then
 	end
 end
 end
+
 empFarming = false
+
 function OnWndMsg(Msg, Key)
-	if Msg == KEY_DOWN and Key == GetKey("%") then
+	if Msg == KEY_DOWN and Key == GetKey("%") or Key == GetKey("A") then
 		if combotype == 2 then combotype = 1 end
-	elseif Msg == KEY_DOWN and Key == GetKey("'") then
+	elseif Msg == KEY_DOWN and Key == GetKey("'") or Key == GetKey("S") then
 		if combotype == 1 then combotype = 2 end
 	elseif Msg == KEY_DOWN and Key == GetKey("Z") then
 		if empFarming == false then empFarming = true else empFarming = false end
@@ -437,7 +441,7 @@ function UseItems()
 				CastSpell(Hydra)
 			end
 		elseif isSac then
-			if not _G.AutoCarry.Orbwalker:IsShooting() then
+			if not _G.AutoCarry.Orbwalker:IsShooting() then 
 				CastSpell(Hydra)
 			end
 		end
@@ -499,14 +503,14 @@ for i, v in ipairs(minionManager(MINION_ENEMY,range,player, MINION_SORT_HEALTH_A
                 lowestMinion = v
         elseif v.health < lowestMinion.health then
                 lowestMinion = v
-        end
+        end    
 end
 for i, v in ipairs(minionManager(MINION_JUNGLE,1000,player,MINION_SORT_HEALTH_ASC).objects) do
         if lowestMinion == nil then
                 lowestMinion = v
         elseif v.health < lowestMinion.health then
                 lowestMinion = v
-        end
+        end    
 end
 
 if ValidTarget(lowestMinion) and Farming.LaneClear then
@@ -547,7 +551,7 @@ elseif isSx then
 end
 end
 if CanCast(_W) and Farming.UseW and GetDistance(lowestMinion) < 500 and lowestMinion.health < wDmg or lowestMinion.health > wDmg + 25 then
-if fury < 5 then
+if fury == 5 then
 	if empFarming then
 		CastSpell(_W)
 	end
@@ -558,10 +562,10 @@ end
 if CanCast(_E) and Farming.UseE and GetDistance(lowestMinion) < 1100 and lowestMinion.health < eDmg or lowestMinion.health > eDmg + 25 and fury < 5 then
 if PredictionType == 1 then
 							local CastPosition,  HitChance,  Position = VP:GetLineCastPosition(lowestMinion, 0, 80, eRange, 1100, myHero, true)
-							if HitChance >= 2 and GetDistance(lowestMinion) <= eRange then
+							if HitChance >= 2 and GetDistance(lowestMinion) <= eRange and fury < 5 then
 								CastSpell(_E, CastPosition.x,CastPosition.z)
 							end
-						elseif PredictionType == 2 then
+						elseif PredictionType == 2 and fury < 5 then
 							local QCastPos, QHitChance = HP:GetPredict("E", lowestMinion, myHero) -- is actually E
 							if QHitChance >= 2 then
 								CastSpell(_E, QCastPos.x, QCastPos.z)
@@ -578,14 +582,14 @@ for i, v in ipairs(minionManager(MINION_ENEMY,range,player, MINION_SORT_HEALTH_A
                 lowestMinion = v
         elseif v.health < lowestMinion.health then
                 lowestMinion = v
-        end
+        end    
 end
 for i, v in ipairs(minionManager(MINION_JUNGLE,1000,player,MINION_SORT_HEALTH_ASC).objects) do
         if lowestMinion == nil then
                 lowestMinion = v
         elseif v.health < lowestMinion.health then
                 lowestMinion = v
-        end
+        end    
 end
 
 if ValidTarget(lowestMinion) and Farming.LastHit then
