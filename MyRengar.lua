@@ -1,4 +1,4 @@
-local version = "1.4"
+local version = "1.5"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/Fret13103/Scripts/master/MyRengar.lua".."?rand="..math.random(1,10000)
@@ -148,9 +148,9 @@ function OnTick()
   target = ReturnTarget()
 	fury = myHero.mana
 	range = myHero.range + GetDistance(myHero.maxBBox)
-	AutoHeal() -- More heals! 
+	AutoHeal() -- More heals!
 	HighFuryCombo()
-	LowFuryCombo() 
+	LowFuryCombo()
 	Ignite()
 	GetItemSlot()
 	UseItems()
@@ -441,7 +441,7 @@ function UseItems()
 				CastSpell(Hydra)
 			end
 		elseif isSac then
-			if not _G.AutoCarry.Orbwalker:IsShooting() then 
+			if not _G.AutoCarry.Orbwalker:IsShooting() then
 				CastSpell(Hydra)
 			end
 		end
@@ -503,14 +503,14 @@ for i, v in ipairs(minionManager(MINION_ENEMY,range,player, MINION_SORT_HEALTH_A
                 lowestMinion = v
         elseif v.health < lowestMinion.health then
                 lowestMinion = v
-        end    
+        end
 end
 for i, v in ipairs(minionManager(MINION_JUNGLE,1000,player,MINION_SORT_HEALTH_ASC).objects) do
         if lowestMinion == nil then
                 lowestMinion = v
         elseif v.health < lowestMinion.health then
                 lowestMinion = v
-        end    
+        end
 end
 
 if ValidTarget(lowestMinion) and Farming.LaneClear then
@@ -559,6 +559,17 @@ else
 	CastSpell(_W)
 end
 end
+if isQ and ValidTarget(lowestMinion, range) then
+	if isSac then
+		if not _G.AutoCarry.Orbwalker:IsShooting() then
+			myHero:Attack(lowestMinion)
+		end
+	elseif isSx then
+		if SxOrb:CanMove() then
+			myHero:Attack(lowestMinion)
+		end
+	end
+end
 if CanCast(_E) and Farming.UseE and GetDistance(lowestMinion) < 1100 and lowestMinion.health < eDmg or lowestMinion.health > eDmg + 25 and fury < 5 then
 if PredictionType == 1 then
 							local CastPosition,  HitChance,  Position = VP:GetLineCastPosition(lowestMinion, 0, 80, eRange, 1100, myHero, true)
@@ -582,14 +593,14 @@ for i, v in ipairs(minionManager(MINION_ENEMY,range,player, MINION_SORT_HEALTH_A
                 lowestMinion = v
         elseif v.health < lowestMinion.health then
                 lowestMinion = v
-        end    
+        end
 end
 for i, v in ipairs(minionManager(MINION_JUNGLE,1000,player,MINION_SORT_HEALTH_ASC).objects) do
         if lowestMinion == nil then
                 lowestMinion = v
         elseif v.health < lowestMinion.health then
                 lowestMinion = v
-        end    
+        end
 end
 
 if ValidTarget(lowestMinion) and Farming.LastHit then
@@ -628,6 +639,17 @@ elseif isSx then
 		end
 	end
 end
+end
+if isQ and ValidTarget(lowestMinion, range) then
+	if isSac then
+		if not _G.AutoCarry.Orbwalker:IsShooting() then
+			myHero:Attack(lowestMinion)
+		end
+	elseif isSx then
+		if SxOrb:CanMove() then
+			myHero:Attack(lowestMinion)
+		end
+	end
 end
 if CanCast(_W) and Farming.UseW and GetDistance(lowestMinion) < 500 and lowestMinion.health < wDmg then
 if fury == 5 then
@@ -676,7 +698,17 @@ function ReturnClosestTo(Position)
 	return ClosestTarget
 end
 
+function OnRemoveBuff(unit, buff, stacks)
+if unit == myHero and buf == "rengarqemp" or "rengarqbase" then
+isQ = false
+end
+end
 
+function OnProcessSpell(unit, spell)
+if unit == myHero and spell.name == "RengarQ" then
+isQ = true
+end
+end
 
 
 
