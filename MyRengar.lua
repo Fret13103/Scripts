@@ -1,4 +1,4 @@
-local version = "1.5"
+local version = "1.6"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/Fret13103/Scripts/master/MyRengar.lua".."?rand="..math.random(1,10000)
@@ -61,6 +61,7 @@ config:addSubMenu("Harass", "harass")
 config:addSubMenu("Farming", "Farming")
 
 Farming = config.Farming
+Drawing = config.Drawing
 
 Farming:addParam("LaneClear", "Laneclear Key", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("V"))
 Farming:addParam("LastHit", "Lasthit key", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("X"))
@@ -74,7 +75,7 @@ config.harass:addParam("UseE", "Use E to harass", SCRIPT_PARAM_ONOFF, true)
 config.harass:addParam("EmpE", "Use Empowered E to harass", SCRIPT_PARAM_ONOFF, false)
 
 config.ComboSettings:addParam("info", "type 1 = Q combo, type 2 = E combo", SCRIPT_PARAM_INFO, "")
-config.ComboSettings:addParam("comboTypeShow", "Combo Type:", SCRIPT_PARAM_INFO, "".. combotype)
+--config.ComboSettings:addParam("comboTypeShow", "Combo Type:", SCRIPT_PARAM_INFO, "".. combotype)
 config.ComboSettings.empCont:addParam("AutoHeal", "Auto Heal at health %", SCRIPT_PARAM_SLICE, 25,0,100,0)
 
 config.Keys:addParam("ComboKey", "Combo Key:", SCRIPT_PARAM_ONKEYDOWN, false, string.byte(" "))
@@ -83,8 +84,11 @@ config.Keys:addParam("infoo", "Z toggle emp farm", SCRIPT_PARAM_INFO, "")
 config.Keys:addParam("infooo", "Arrow keys(left right) set combo type", SCRIPT_PARAM_INFO, "")
 
 config.Drawing:addParam("draw", "Do drawing", SCRIPT_PARAM_ONOFF, true)
-config.Drawing:addParam("drawType", "Draw combo type", SCRIPT_PARAM_ONOFF, true)
+config.Drawing:addParam("drawType", "Draw combo and prediction type", SCRIPT_PARAM_ONOFF, true)
 config.Drawing:addParam("drawSpells", "Draw Spell Ranges", SCRIPT_PARAM_ONOFF, true)
+Drawing:addParam("drawW", "Draw W", SCRIPT_PARAM_ONOFF , true)
+Drawing:addParam("drawE", "Draw E", SCRIPT_PARAM_ONOFF , true)
+Drawing:addParam("drawAA", "Draw AA range", SCRIPT_PARAM_ONOFF , true)
 
 if myHero:GetSpellData(SUMMONER_1).name:find("summonerdot") then ign = SUMMONER_1
 elseif myHero:GetSpellData(SUMMONER_2).name:find("summonerdot") then ign = SUMMONER_2
@@ -99,7 +103,7 @@ function OnDraw()
 fight = config.Keys.ComboKey
 ComboType = combotype
 PredictionType = config.Pred
-	if config.Drawing.draw then
+	if config.Drawing.draw and Drawing.drawAA then
 		DrawCircle(myHero.x, myHero.y, myHero.z, range, 0xffffff)
 		if ValidTarget(target) then
 		DrawCircle(target.x, target.y, target.z, 200, 0xff0000)
@@ -125,10 +129,10 @@ PredictionType = config.Pred
 			end
 		end
 		if config.Drawing.drawSpells then
-			if CanCast(_W) then
+			if CanCast(_W) and Drawing.drawW then
 			DrawCircle(myHero.x, myHero.y, myHero.z, 500, 0xffffff)
 			end
-			if CanCast(_E) then
+			if CanCast(_E) and Drawing.drawE then
 			DrawCircle(myHero.x, myHero.y, myHero.z, eRange, 0xffffff)
 			end
 		end
@@ -380,9 +384,9 @@ end
 empFarming = false
 
 function OnWndMsg(Msg, Key)
-	if Msg == KEY_DOWN and Key == GetKey("%") or Key == GetKey("A") then
+	if Msg == KEY_DOWN and Key == GetKey("%") then
 		if combotype == 2 then combotype = 1 end
-	elseif Msg == KEY_DOWN and Key == GetKey("'") or Key == GetKey("S") then
+	elseif Msg == KEY_DOWN and Key == GetKey("'") then
 		if combotype == 1 then combotype = 2 end
 	elseif Msg == KEY_DOWN and Key == GetKey("Z") then
 		if empFarming == false then empFarming = true else empFarming = false end
