@@ -1,4 +1,4 @@
-local version = "1.6"
+local version = "1.7"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/Fret13103/Scripts/master/MyRengar.lua".."?rand="..math.random(1,10000)
@@ -103,10 +103,16 @@ function OnDraw()
 fight = config.Keys.ComboKey
 ComboType = combotype
 PredictionType = config.Pred
-	if config.Drawing.draw and Drawing.drawAA then
+	if config.Drawing.draw then
+		if Drawing.drawAA then
 		DrawCircle(myHero.x, myHero.y, myHero.z, range, 0xffffff)
+		end
 		if ValidTarget(target) then
 		DrawCircle(target.x, target.y, target.z, 200, 0xff0000)
+		if ComboWillKill(target) then
+		local startLeft = WorldToScreen(D3DXVECTOR3(target.x, target.y, target.z))
+		DrawText("Combo Will kill", 18, startLeft.x, startLeft.y, 0xFF0000FF)
+		end
 		end
 		if config.Drawing.drawType then
 			if ComboType == 1 then
@@ -714,7 +720,39 @@ isQ = true
 end
 end
 
-
+function ComboWillKill(unit)
+	if fury < 5 then
+		qDmg = myHero.totalDamage + myHero:GetSpellData(_Q).level * 30 + (myHero.totalDamage / 100 * (myHero:	GetSpellData(_Q).level * 5))
+		wDmg = myHero:GetSpellData(_W).level * 24  + 50 + myHero.ap / 100 * 80
+		eDmg = myHero:GetSpellData(_E).level * 50 + myHero.totalDamage / 100 * 70
+else
+		qDmg = (myHero:GetSpellData(_Q).level * 42) + 30 + (myHero.totalDamage / 100 * 50)
+		wDmg = myHero:GetSpellData(_W).level * 50 + myHero.ap / 100 * 80 --about right
+		eDmg = myHero:GetSpellData(_E).level * 58 + 50 + myHero.totalDamage / 100 * 70
+end
+	local usedQ
+	local usedW
+	local usedE
+	if CanCast(_Q) then
+		HealthAfterQ = unit.health - qDmg
+		if HealthAfterQ < 0 then
+			return true
+		end
+	end
+	if CanCast(_W) then
+		HealthAfterW = unit.health - wDmg
+		if HealthAfterW < 0 then
+			return true
+		end
+	end
+	if CanCast(_E) then
+		HealthAfterE = unit.health - eDmg
+		if HealthAfterE < 0 then
+			return true
+		end
+	end
+	return false
+end
 
 
 
