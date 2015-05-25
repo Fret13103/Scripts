@@ -1,4 +1,4 @@
-local version = "1.7"
+local version = "1.9"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/Fret13103/Scripts/master/MyRengar.lua".."?rand="..math.random(1,10000)
@@ -112,6 +112,9 @@ PredictionType = config.Pred
 		if ComboWillKill(target) then
 		local startLeft = WorldToScreen(D3DXVECTOR3(target.x, target.y, target.z))
 		DrawText("Combo Will kill", 18, startLeft.x, startLeft.y, 0xFF0000FF)
+		else
+		local startLeft = WorldToScreen(D3DXVECTOR3(target.x, target.y, target.z))
+		DrawText("Combo probably wont kill", 18, startLeft.x, startLeft.y, 0xFF000000)
 		end
 		end
 		if config.Drawing.drawType then
@@ -396,6 +399,8 @@ function OnWndMsg(Msg, Key)
 		if combotype == 1 then combotype = 2 end
 	elseif Msg == KEY_DOWN and Key == GetKey("Z") then
 		if empFarming == false then empFarming = true else empFarming = false end
+	elseif Msg == KEY_DOWN and Key == GetKey("16") then
+		if combotype == 1 then combotype = 2 else combotype = 1 end
 	end
 	if Msg == WM_LBUTTONDOWN then
 		closest = ReturnClosestTo(mousePos)
@@ -433,15 +438,18 @@ local Ghostblade
 local BORK
 
 function GetItemSlot()
-	for slot = ITEM_1, ITEM_7 do
-		local currentItem = myHero:GetSpellData(slot)
-		if currentItem.name == "ItemTiamatCleave" then
-			Hydra = slot
-		elseif currentItem.name == "YoumusBlade" then
-			Ghostblade = slot
-		elseif currentItem.name == "ItemSwordOfFeastAndFamine" or currentItem.name == "BilgewaterCutlass" then BORK = slot
-		end
-	end
+        for slot = ITEM_1, ITEM_7 do
+                local currentItemName = myHero:GetSpellData(slot).name
+                if currentItemName == "ItemTiamatCleave" then
+                Hydra = slot
+                elseif currentItemName  == "YoumusBlade" then
+                Ghostblade = slot
+                elseif currentItemName == "ItemSwordOfFeastAndFamine" then
+                BORK = slot
+                elseif currentItemName == "BilgewaterCutlass" then
+                BORK = slot
+                end
+        end
 end
 
 function UseItems()
@@ -721,39 +729,85 @@ end
 end
 
 function ComboWillKill(unit)
-	if fury < 5 then
-		qDmg = myHero.totalDamage + myHero:GetSpellData(_Q).level * 30 + (myHero.totalDamage / 100 * (myHero:	GetSpellData(_Q).level * 5))
+	local furycount = nil
+		qDmg = myHero.totalDamage + myHero:GetSpellData(_Q).level * 30 + (myHero.totalDamage / 100 * (myHero:GetSpellData(_Q).level * 5))
 		wDmg = myHero:GetSpellData(_W).level * 24  + 50 + myHero.ap / 100 * 80
 		eDmg = myHero:GetSpellData(_E).level * 50 + myHero.totalDamage / 100 * 70
-else
-		qDmg = (myHero:GetSpellData(_Q).level * 42) + 30 + (myHero.totalDamage / 100 * 50)
-		wDmg = myHero:GetSpellData(_W).level * 50 + myHero.ap / 100 * 80 --about right
-		eDmg = myHero:GetSpellData(_E).level * 58 + 50 + myHero.totalDamage / 100 * 70
+		EmpQDmg = (myHero:GetSpellData(_Q).level * 42) + 30 + (myHero.totalDamage / 100 * 50)
+		EmpWDmg = myHero:GetSpellData(_W).level * 50 + myHero.ap / 100 * 80 --about right
+		EmpEDmg = myHero:GetSpellData(_E).level * 58 + 50 + myHero.totalDamage / 100 * 70
+	local usedQ = false
+	local usedW = false
+	local usedE = false
+	local HealthAfter = unit.health
+	if combotype == 1 then
+		if fury == 5 then
+			if CanCast(_Q) and CanCast(_W) and CanCast(_E) then
+				HealthAfter = HealthAfter - (EmpQDmg + qDmg + wDmg + eDmg)
+			end
+		elseif fury < 5 and fury > 1 then
+			furycount = fury
+			if CanCast(_Q) then
+				furycount = furycount + 1
+				HealthAfter = HealthAfter - qDmg
+			end
+			if CanCast(_W) then
+				furycount = furycount + 1
+				HealthAfter = HealthAfter - wDmg
+			end
+			if CanCast(_E) then
+				furycount = furycount + 1
+				HealthAfter = HealthAfter - eDmg
+			end
+			if furycount >= 5 then
+				HealthAfter = HealthAfter - EmpQDmg
+			end
+		else
+			if CanCast(_Q) then
+				HealthAfter = HealthAfter - qDmg
+			end
+			if CanCast(_E) then
+				HealthAfter = HealthAfter - eDmg
+			end
+			if CanCast(_W) then
+				HealthAfter = HealthAfter - wDmg
+			end
+		end
+	elseif combotype == 2 then
+		if fury == 5 then
+			if CanCast(_Q) and CanCast(_W) and CanCast(_E) then
+				HealthAfter = HealthAfter - (EmpEDmg + qDmg + wDmg + eDmg)
+			end
+		elseif fury < 5 and fury > 1 then
+			furycount = fury
+			if CanCast(_Q) then
+				furycount = furycount + 1
+				HealthAfter = HealthAfter - qDmg
+			end
+			if CanCast(_W) then
+				furycount = furycount + 1
+				HealthAfter = HealthAfter - wDmg
+			end
+			if CanCast(_E) then
+				furycount = furycount + 1
+				HealthAfter = HealthAfter - eDmg
+			end
+			if furycount >= 5 then
+				HealthAfter = HealthAfter - EmpEDmg
+			end
+		else
+			if CanCast(_Q) then
+				HealthAfter = HealthAfter - qDmg
+			end
+			if CanCast(_E) then
+				HealthAfter = HealthAfter - eDmg
+			end
+			if CanCast(_W) then
+				HealthAfter = HealthAfter - wDmg
+			end
+		end
+	end
 end
-	local usedQ
-	local usedW
-	local usedE
-	if CanCast(_Q) then
-		HealthAfterQ = unit.health - qDmg
-		if HealthAfterQ < 0 then
-			return true
-		end
-	end
-	if CanCast(_W) then
-		HealthAfterW = unit.health - wDmg
-		if HealthAfterW < 0 then
-			return true
-		end
-	end
-	if CanCast(_E) then
-		HealthAfterE = unit.health - eDmg
-		if HealthAfterE < 0 then
-			return true
-		end
-	end
-	return false
-end
-
 
 
 
