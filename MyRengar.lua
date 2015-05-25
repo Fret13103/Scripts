@@ -1,4 +1,4 @@
-local version = "1.9"
+local version = "2"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/Fret13103/Scripts/master/MyRengar.lua".."?rand="..math.random(1,10000)
@@ -695,8 +695,8 @@ end
 end
 
 function ReturnTarget()
-	if ValidTarget(closest) and GetDistance(closest) < 2000 then
-		idealTarget = closest
+	if ValidTarget(clickTarget) and GetDistance(clickTarget) < 2000 then
+		idealTarget = clickTarget
 	elseif ValidTarget(ts.target) then
 		idealTarget = ts.target
 	end
@@ -772,11 +772,13 @@ function ComboWillKill(unit)
 			if CanCast(_W) then
 				HealthAfter = HealthAfter - wDmg
 			end
+			if HealthAfter < 0 then return true else return false end
 		end
 	elseif combotype == 2 then
 		if fury == 5 then
 			if CanCast(_Q) and CanCast(_W) and CanCast(_E) then
 				HealthAfter = HealthAfter - (EmpEDmg + qDmg + wDmg + eDmg)
+				if HealthAfter <= 0 then return true end
 			end
 		elseif fury < 5 and fury > 1 then
 			furycount = fury
@@ -805,6 +807,7 @@ function ComboWillKill(unit)
 			if CanCast(_W) then
 				HealthAfter = HealthAfter - wDmg
 			end
+			if HealthAfter < 0 then return true else return false end
 		end
 	end
 end
