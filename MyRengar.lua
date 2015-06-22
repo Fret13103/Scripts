@@ -1,9 +1,10 @@
-local version = "2.1"
+local version = "2.2"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/Fret13103/Scripts/master/MyRengar.lua".."?rand="..math.random(1,10000)
 local UPDATE_FILE_PATH = SCRIPT_PATH..GetCurrentEnv().FILE_NAME
 local UPDATE_URL = "https://"..UPDATE_HOST..UPDATE_PATH
+range = myHero.range + GetDistance(myHero.maxBBox)
 
 function AutoupdaterMsg(msg) print("<font color=\"#6699ff\"><b>My Rengar:</b></font> <font color=\"#FFFFFF\">"..msg..".</font>") end
 if AUTOUPDATE then
