@@ -1,4 +1,4 @@
-local version = "2.2"
+local version = "2.3"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/Fret13103/Scripts/master/MyRengar.lua".."?rand="..math.random(1,10000)
@@ -48,7 +48,7 @@ ts = TargetSelector(TARGET_LESS_CAST_PRIORITY, eRange, true)
 
 VP = VPrediction()
 HP = HPrediction()
-HP_E = HPSkillshot("E", "Rengar", {collisionM = true, collisionH = true, delay = 0, range = 1100, speed = 1800, type = "DelayLine", width = 90})
+HP_E = HPSkillshot({collisionM = true, collisionH = true, delay = 0, range = 1100, speed = 1800, type = "DelayLine", width = 90})
 
 config = scriptConfig("My Rengar", "Rengar")
 config:addParam("Pred", "Prediction Type", SCRIPT_PARAM_LIST, 2, {"VPrediction", "HPrediction"})
@@ -733,9 +733,9 @@ function ComboWillKill(unit)
 		qDmg = myHero.totalDamage + myHero:GetSpellData(_Q).level * 30 + (myHero.totalDamage / 100 * (myHero:GetSpellData(_Q).level * 5))
 		wDmg = myHero:GetSpellData(_W).level * 24  + 50 + myHero.ap / 100 * 80
 		eDmg = myHero:GetSpellData(_E).level * 50 + myHero.totalDamage / 100 * 70
-		EmpQDmg = (myHero:GetSpellData(_Q).level * 42) + 30 + ((myHero.totalDamage / 100) * 150)
+		EmpQDmg = (myHero:GetSpellData(_Q).level * 42) + 30 + ((myHero.totalDamage / 100) * 150) + myHero.totalDamage
 		EmpWDmg = myHero:GetSpellData(_W).level * 50 + myHero.ap / 100 * 80 --about right
-		EmpEDmg = myHero:GetSpellData(_E).level * 58 + 50 + myHero.totalDamage / 100 * 70
+		EmpEDmg = (myHero:GetSpellData(_E).level * 58) + 50 + (myHero.totalDamage / 100) * 70
 	local usedQ = false
 	local usedW = false
 	local usedE = false
