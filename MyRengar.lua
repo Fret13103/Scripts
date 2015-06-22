@@ -1,4 +1,4 @@
-local version = "2"
+local version = "2.1"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/Fret13103/Scripts/master/MyRengar.lua".."?rand="..math.random(1,10000)
@@ -39,7 +39,6 @@ local eRange = 1100
 require "VPrediction"
 require "HPrediction"
 
-HP_Q = HPSkillshot({type = "DelayLine", delay = 0, range = 1100, speed = 1500, radius = 80})
 --promptline = math.huge speed, delayline is normal lineskillshot.
 --took me a day but I finally got close enough to the right speed of E for HPRED.
 
@@ -48,7 +47,7 @@ ts = TargetSelector(TARGET_LESS_CAST_PRIORITY, eRange, true)
 
 VP = VPrediction()
 HP = HPrediction()
-HP:AddSpell("E", "Rengar", {collisionM = true, collisionH = true, delay = 0, range = 1100, speed = 1800, type = "DelayLine", width = 90})
+HP_E = HPSkillshot("E", "Rengar", {collisionM = true, collisionH = true, delay = 0, range = 1100, speed = 1800, type = "DelayLine", width = 90})
 
 config = scriptConfig("My Rengar", "Rengar")
 config:addParam("Pred", "Prediction Type", SCRIPT_PARAM_LIST, 2, {"VPrediction", "HPrediction"})
@@ -254,10 +253,10 @@ if fight then
 								combotype = 1
 							end
 						elseif PredictionType == 2 then
-							local QCastPos, QHitChance = HP:GetPredict("E", target, myHero) -- is actually E
+							local QCastPos, QHitChance = HP:GetPredict(HP_E, target, myHero) -- is actually E
 							if QHitChance >= 2 then
 								CastSpell(_E, QCastPos.x, QCastPos.z)
-								combotype = 1
+								ComboType = 1
 							end
 						end
 					end
@@ -271,7 +270,7 @@ if fight then
 								CastSpell(_E, CastPosition.x,CastPosition.z)
 							end
 						elseif PredictionType == 2 then
-							local QCastPos, QHitChance = HP:GetPredict("E", target, myHero) -- is actually E
+							local QCastPos, QHitChance = HP:GetPredict(HP_E, target, myHero) -- is actually E
 							if QHitChance >= 2 then
 								CastSpell(_E, QCastPos.x, QCastPos.z)
 							end
@@ -284,7 +283,7 @@ if fight then
 								CastSpell(_E, CastPosition.x,CastPosition.z)
 							end
 						elseif PredictionType == 2 then
-							local QCastPos, QHitChance = HP:GetPredict("E", target, myHero) -- is actually E
+							local QCastPos, QHitChance = HP:GetPredict(HP_E, target, myHero) -- is actually E
 							if QHitChance >= 2 then
 								CastSpell(_E, QCastPos.x, QCastPos.z)
 							end
@@ -302,7 +301,7 @@ if fight then
 								CastSpell(_E, CastPosition.x,CastPosition.z)
 							end
 						elseif PredictionType == 2 then
-							local QCastPos, QHitChance = HP:GetPredict("E", target, myHero) -- is actually E
+							local QCastPos, QHitChance = HP:GetPredict(HP_E, target, myHero) -- is actually E
 							if QHitChance >= 2 then
 								CastSpell(_E, QCastPos.x, QCastPos.z)
 							end
@@ -321,11 +320,11 @@ if fight then
 								CastSpell(_E, CastPosition.x,CastPosition.z)
 							end end, .1)
 						elseif PredictionType == 2 then
-							local QCastPos, QHitChance = HP:GetPredict("E", target, myHero) -- is actually E
+							local QCastPos, QHitChance = HP:GetPredict(HP_E, target, myHero) -- is actually E
 							if QHitChance >= 2 then
 								CastSpell(_E, QCastPos.x, QCastPos.z)
 							end
-							DelayAction(function() local QCastPos, QHitChance = HP:GetPredict("E", target, myHero) -- is actually E
+							DelayAction(function() local QCastPos, QHitChance = HP:GetPredict(HP_E, target, myHero) -- is actually E
 							if QHitChance >= 2 then
 								CastSpell(_E, QCastPos.x, QCastPos.z)
 							end end, .1)
@@ -357,7 +356,7 @@ if config.Keys.ComboKey then
 								CastSpell(_E, CastPosition.x,CastPosition.z)
 							end
 						elseif PredictionType == 2 then
-							local QCastPos, QHitChance = HP:GetPredict("E", target, myHero) -- is actually E
+							local QCastPos, QHitChance = HP:GetPredict(HP_E, target, myHero) -- is actually E
 							if QHitChance >= 2 then
 								CastSpell(_E, QCastPos.x, QCastPos.z)
 							end
@@ -378,7 +377,7 @@ if config.Keys.ComboKey then
 								CastSpell(_E, CastPosition.x,CastPosition.z)
 							end
 						elseif PredictionType == 2 then
-							local QCastPos, QHitChance = HP:GetPredict("E", target, myHero) -- is actually E
+							local QCastPos, QHitChance = HP:GetPredict(HP_E, target, myHero) -- is actually E
 							if QHitChance >= 2 then
 								CastSpell(_E, QCastPos.x, QCastPos.z)
 							end
@@ -399,7 +398,7 @@ function OnWndMsg(Msg, Key)
 		if combotype == 1 then combotype = 2 end
 	elseif Msg == KEY_DOWN and Key == GetKey("Z") then
 		if empFarming == false then empFarming = true else empFarming = false end
-	elseif Msg == KEY_DOWN and Key == GetKey("16") then
+	elseif Msg == KEY_DOWN and Key == GetKey("(16)") then
 		if combotype == 1 then combotype = 2 else combotype = 1 end
 	end
 	if Msg == WM_LBUTTONDOWN then
@@ -472,7 +471,7 @@ function UseItems()
 			CastSpell(BORK, target)
 		end
 	end
-	if fight and ValidTarget(target) and Ghostblade and CanCast(Ghostblade) and GetDistance(target) < (range*range) then
+	if fight and ValidTarget(target) and Ghostblade and CanCast(Ghostblade) and GetDistance(target) < (1250) then
 		CastSpell(Ghostblade)
 	end
 end
@@ -491,7 +490,7 @@ function Harass()
 								CastSpell(_E, CastPosition.x,CastPosition.z)
 							end
 						elseif PredictionType == 2 then
-							local QCastPos, QHitChance = HP:GetPredict("E", target, myHero) -- is actually E
+							local QCastPos, QHitChance = HP:GetPredict(HP_E, target, myHero) -- is actually E
 							if QHitChance >= 2 then
 								CastSpell(_E, QCastPos.x, QCastPos.z)
 							end
@@ -504,7 +503,7 @@ function Harass()
 								CastSpell(_E, CastPosition.x,CastPosition.z)
 							end
 						elseif PredictionType == 2 then
-							local QCastPos, QHitChance = HP:GetPredict("E", target, myHero) -- is actually E
+							local QCastPos, QHitChance = HP:GetPredict(HP_E, target, myHero) -- is actually E
 							if QHitChance >= 2 then
 								CastSpell(_E, QCastPos.x, QCastPos.z)
 							end
@@ -595,7 +594,7 @@ if PredictionType == 1 then
 								CastSpell(_E, CastPosition.x,CastPosition.z)
 							end
 						elseif PredictionType == 2 and fury < 5 then
-							local QCastPos, QHitChance = HP:GetPredict("E", lowestMinion, myHero) -- is actually E
+							local QCastPos, QHitChance = HP:GetPredict(HP_E, lowestMinion, myHero) -- is actually E
 							if QHitChance >= 2 then
 								CastSpell(_E, QCastPos.x, QCastPos.z)
 							end
@@ -685,7 +684,7 @@ if PredictionType == 1 then
 								CastSpell(_E, CastPosition.x,CastPosition.z)
 							end
 						elseif PredictionType == 2 then
-							local QCastPos, QHitChance = HP:GetPredict("E", lowestMinion, myHero) -- is actually E
+							local QCastPos, QHitChance = HP:GetPredict(HP_E, lowestMinion, myHero) -- is actually E
 							if QHitChance >= 2 then
 								CastSpell(_E, QCastPos.x, QCastPos.z)
 							end
@@ -733,7 +732,7 @@ function ComboWillKill(unit)
 		qDmg = myHero.totalDamage + myHero:GetSpellData(_Q).level * 30 + (myHero.totalDamage / 100 * (myHero:GetSpellData(_Q).level * 5))
 		wDmg = myHero:GetSpellData(_W).level * 24  + 50 + myHero.ap / 100 * 80
 		eDmg = myHero:GetSpellData(_E).level * 50 + myHero.totalDamage / 100 * 70
-		EmpQDmg = (myHero:GetSpellData(_Q).level * 42) + 30 + (myHero.totalDamage / 100 * 50)
+		EmpQDmg = (myHero:GetSpellData(_Q).level * 42) + 30 + ((myHero.totalDamage / 100) * 150)
 		EmpWDmg = myHero:GetSpellData(_W).level * 50 + myHero.ap / 100 * 80 --about right
 		EmpEDmg = myHero:GetSpellData(_E).level * 58 + 50 + myHero.totalDamage / 100 * 70
 	local usedQ = false
@@ -743,7 +742,7 @@ function ComboWillKill(unit)
 	if combotype == 1 then
 		if fury == 5 then
 			if CanCast(_Q) and CanCast(_W) and CanCast(_E) then
-				HealthAfter = HealthAfter - (EmpQDmg + qDmg + wDmg + eDmg)
+				HealthAfter = HealthAfter - (EmpQDmg + (qDmg / 100 * 110) + wDmg + eDmg)
 			end
 		elseif fury < 5 and fury > 1 then
 			furycount = fury
