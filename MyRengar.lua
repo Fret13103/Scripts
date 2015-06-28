@@ -1,4 +1,4 @@
-local version = "2.3"
+local version = "2.4"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/Fret13103/Scripts/master/MyRengar.lua".."?rand="..math.random(1,10000)
@@ -95,6 +95,10 @@ elseif myHero:GetSpellData(SUMMONER_2).name:find("summonerdot") then ign = SUMMO
 else ign = nil end
 
 LoadOrbwalker()
+if FileExist(SPRITE_PATH .. "/ReticleSprite/Reticle.png") then
+	print("hi")
+  reticle = createSprite(SPRITE_PATH .. "/ReticleSprite/Reticle.png")
+end
 
 print("My Rengar(v:"..version..") is:<font> <font color = \"#FF0000\">Loaded! </font>")
 end
@@ -145,6 +149,11 @@ PredictionType = config.Pred
 			DrawCircle(myHero.x, myHero.y, myHero.z, eRange, 0xffffff)
 			end
 		end
+	end
+	if reticle and ValidTarget(target) then
+		reticle:SetScale(0.2, 0.2)
+		tpos = WorldToScreen(D3DXVECTOR3(target.x, target.y, target.z))
+		reticle:Draw(tpos.x-(65), tpos.y-(100), 200)
 	end
 end
 
@@ -293,7 +302,7 @@ if fight then
 				end
 			end
 		else
-			if ValidTarget(target) then
+			if ValidTarget(target) and not pressedR then
 				if fury == 5 then
 					if CanCast(_E) and GetDistance(target) < eRange then
 						if PredictionType == 1 then
@@ -391,6 +400,7 @@ end
 end
 
 empFarming = false
+pressedR = false
 
 function OnWndMsg(Msg, Key)
 	if Msg == KEY_DOWN and Key == GetKey("%") then
@@ -401,6 +411,9 @@ function OnWndMsg(Msg, Key)
 		if empFarming == false then empFarming = true else empFarming = false end
 	elseif Msg == KEY_DOWN and Key == GetKey("(16)") then
 		if combotype == 1 then combotype = 2 else combotype = 1 end
+	elseif Msg == KEY_DOWN and Key == GetKey("R") then
+		pressedR = true
+		DelayAction(function() pressedR = false end, 7)
 	end
 	if Msg == WM_LBUTTONDOWN then
 		closest = ReturnClosestTo(mousePos)
@@ -695,7 +708,7 @@ end
 end
 
 function ReturnTarget()
-	if ValidTarget(clickTarget) and GetDistance(clickTarget) < 2000 then
+	if ValidTarget(clickTarget) and GetDistance(clickTarget) < 1000 then
 		idealTarget = clickTarget
 	elseif ValidTarget(ts.target) then
 		idealTarget = ts.target
@@ -743,7 +756,7 @@ function ComboWillKill(unit)
 	if combotype == 1 then
 		if fury == 5 then
 			if CanCast(_Q) and CanCast(_W) and CanCast(_E) then
-				HealthAfter = HealthAfter - (EmpQDmg + (qDmg / 100 * 110) + wDmg + eDmg)
+				HealthAfter = HealthAfter - (EmpQDmg + (((qDmg / 100 * 110) + wDmg + eDmg)))/100 * 110
 			end
 		elseif fury < 5 and fury > 1 then
 			furycount = fury
@@ -812,6 +825,17 @@ function ComboWillKill(unit)
 	end
 end
 
+function OnApplyBuff(source, target, buff)
+if target == myHero and buff.name == "RengarR" then
+pressedR = true
+end
+end
+
+function OnRemoveBuff(unit, buff)
+if unit == myHero and buff.name == "RengarR" then
+pressedR = false
+end
+end
 
 
 
