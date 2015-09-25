@@ -8,6 +8,32 @@ local UPDATE_URL = "https://"..UPDATE_HOST..UPDATE_PATH
 local positions = {}
 qRange = 800
 
+
+	function AutoupdaterMsg(msg) print("<font color=\"#6699ff\"><Teemo:</b></font> <font color=\"#FFFFFF\">"..msg..".</font>") end
+if AUTOUPDATE then
+	local ServerData = GetWebResult(UPDATE_HOST,"/Fret13103/Scripts1/master/Teemo.version")
+	--print(ServerData)
+	if ServerData then
+		--print("Has server Data")
+		ServerVersion = type(tonumber(ServerData)) == "number" and tonumber(ServerData) or nil
+		print(ServerVersion)
+		if ServerVersion then
+			if tonumber(version) < ServerVersion then
+				AutoupdaterMsg("New version available "..ServerVersion)
+				AutoupdaterMsg("Updating, please don't press F9")
+				print("Updating")
+				DelayAction(function() DownloadFile(UPDATE_URL, UPDATE_FILE_PATH, function () AutoupdaterMsg("Successfully updated. ("..version.." => "..ServerVersion.."), press F9 twice to load the updated version.") end) end, 2)
+				--print("Updated")
+			else
+				AutoupdaterMsg("You have got the latest version ("..ServerVersion..")")
+				AutoupdaterMsg("If your local version > server version then please report this")
+			end
+		end
+	else
+		AutoupdaterMsg("Error downloading version info")
+	end
+end
+
 function OnLoad()
 	ts = TargetSelector(TARGET_LESS_CAST_PRIORITY,  (qRange + 200), true)
 	if GetSave("TEEMOPOSITIONS").positions ~= nil then
